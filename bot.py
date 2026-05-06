@@ -2,7 +2,7 @@ import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 
-TOKEN = 8684577150:AAEfo5PjQPX4hWu6soJr6zm2JQA8_kVkRHA
+TOKEN = "8684577150:AAEfo5PjQPX4hWu6soJr6zm2JQA8_kVkRHA"
 
 ADMIN_GROUP_ID = -1005226802673
 CHANNEL_ID = -1003838008372
