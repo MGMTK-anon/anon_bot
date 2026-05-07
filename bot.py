@@ -4,8 +4,8 @@ from aiogram.filters import CommandStart
 
 TOKEN = "8684577150:AAEfo5PjQPX4hWu6soJr6zm2JQA8_kVkRHA"
 
-ADMIN_GROUP_ID = -1001234567890
-CHANNEL_ID = -1009876543210
+ADMIN_GROUP_ID = -1003783517039
+CHANNEL_ID = -1003838008372
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
