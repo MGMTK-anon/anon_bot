@@ -55,7 +55,7 @@ async def handle_message(message: types.Message):
 
     if not subscribed:
         await message.answer(
-            f"❌ Подпишись на канал {CHANNEL_USERNAME}"
+            f"❌ Вы должны быть подписаны на канал"
         )
         return
 
