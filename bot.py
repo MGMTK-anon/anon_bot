@@ -103,79 +103,49 @@ if message.text:
         f"{text}"
     )
 
-    # Текст
-    if message.text:
-        await bot.send_message(
-            ADMIN_GROUP_ID,
-            admin_text
-        )
+   # Текст
+if message.text:
+    await bot.send_message(
+        ADMIN_GROUP_ID,
+        admin_text
+    )
 
-        await bot.send_message(
-            CHANNEL_ID,
-            text
-        )
+    await bot.send_message(
+        CHANNEL_ID,
+        text
+    )
 
-    # Фото
-    elif message.photo:
-        photo = message.photo[-1].file_id
+# Фото
+elif message.photo:
+    photo = message.photo[-1].file_id
 
-        await bot.send_photo(
-            ADMIN_GROUP_ID,
-            photo,
-            caption=admin_text
-        )
+    await bot.send_photo(
+        ADMIN_GROUP_ID,
+        photo,
+        caption=admin_text
+    )
 
-        await bot.send_photo(
-            CHANNEL_ID,
-            photo,
-            caption=caption
-        )
+    await bot.send_photo(
+        CHANNEL_ID,
+        photo,
+        caption=caption
+    )
 
-    # Видео
-    elif message.video:
-        await bot.send_video(
-            ADMIN_GROUP_ID,
-            message.video.file_id,
-            caption=admin_text
-        )
+# Видео
+elif message.video:
+    await bot.send_video(
+        ADMIN_GROUP_ID,
+        message.video.file_id,
+        caption=admin_text
+    )
 
-        await bot.send_video(
-            CHANNEL_ID,
-            message.video.file_id,
-            caption=caption
-        )
+    await bot.send_video(
+        CHANNEL_ID,
+        message.video.file_id,
+        caption=caption
+    )
 
-    # Голосовое
-    elif message.voice:
-        await bot.send_voice(
-            ADMIN_GROUP_ID,
-            message.voice.file_id,
-            caption=f"🎤 ГС от {username}"
-        )
-
-        await bot.send_voice(
-            CHANNEL_ID,
-            message.voice.file_id
-        )
-
-    # Кружочек
-    elif message.video_note:
-        await bot.send_message(
-            ADMIN_GROUP_ID,
-            f"📹 Кружочек от {username}"
-        )
-
-        await bot.send_video_note(
-            ADMIN_GROUP_ID,
-            message.video_note.file_id
-        )
-
-        await bot.send_video_note(
-            CHANNEL_ID,
-            message.video_note.file_id
-        )
-
-    # Гифка
+# Гифка
 elif message.animation:
     await bot.send_animation(
         ADMIN_GROUP_ID,
@@ -189,11 +159,41 @@ elif message.animation:
         caption=caption
     )
 
-    else:
-        await message.answer(
-            "❌ Этот тип файла не поддерживается"
-        )
-        return
+# Голосовое
+elif message.voice:
+    await bot.send_voice(
+        ADMIN_GROUP_ID,
+        message.voice.file_id,
+        caption=f"🎤 ГС от {username}"
+    )
+
+    await bot.send_voice(
+        CHANNEL_ID,
+        message.voice.file_id
+    )
+
+# Кружочек
+elif message.video_note:
+    await bot.send_message(
+        ADMIN_GROUP_ID,
+        f"📹 Кружочек от {username}"
+    )
+
+    await bot.send_video_note(
+        ADMIN_GROUP_ID,
+        message.video_note.file_id
+    )
+
+    await bot.send_video_note(
+        CHANNEL_ID,
+        message.video_note.file_id
+    )
+
+else:
+    await message.answer(
+        "❌ Этот тип файла не поддерживается"
+    )
+    return
 
     await message.answer(
         "✅ Сообщение успешно отправлено"
