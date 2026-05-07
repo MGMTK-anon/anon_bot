@@ -51,21 +51,25 @@ async def handle_message(message: types.Message):
     user_id = message.from_user.id
 
     # ---------------- ПОДПИСКА ----------------
+
     subscribed = await is_subscribed(user_id)
 
     if not subscribed:
         await message.answer(
-            f"❌ Вы должны быть подписаны на канал {CHANNEL_USERNAME}"
+            f"❌ Вы должны быть подписаны на канал"
         )
         return
 
     # ---------------- АНТИСПАМ ----------------
+
     current_time = time.time()
 
     if user_id in user_last_message:
+
         last_time = user_last_message[user_id]
 
         if current_time - last_time < SPAM_COOLDOWN:
+
             await message.answer(
                 "⏳ Не спамь. Подожди немного."
             )
@@ -74,12 +78,13 @@ async def handle_message(message: types.Message):
     user_last_message[user_id] = current_time
 
     # ---------------- ДАННЫЕ ЮЗЕРА ----------------
+
     user = message.from_user
 
     username = (
         f"@{user.username}"
         if user.username
-        else user.full_name
+        else f'<a href="tg://user?id={user.id}">Профиль пользователя</a>'
     )
 
     caption = message.caption or ""
@@ -95,7 +100,9 @@ async def handle_message(message: types.Message):
     # только для текста
 
     if message.text:
+
         if len(text.strip()) < MIN_TEXT_LENGTH:
+
             await message.answer(
                 f"❌ Минимум {MIN_TEXT_LENGTH} символов"
             )
@@ -107,7 +114,8 @@ async def handle_message(message: types.Message):
 
         await bot.send_message(
             ADMIN_GROUP_ID,
-            admin_text
+            admin_text,
+            parse_mode="HTML"
         )
 
         await bot.send_message(
@@ -124,7 +132,8 @@ async def handle_message(message: types.Message):
         await bot.send_photo(
             ADMIN_GROUP_ID,
             photo,
-            caption=admin_text
+            caption=admin_text,
+            parse_mode="HTML"
         )
 
         await bot.send_photo(
@@ -140,7 +149,8 @@ async def handle_message(message: types.Message):
         await bot.send_video(
             ADMIN_GROUP_ID,
             message.video.file_id,
-            caption=admin_text
+            caption=admin_text,
+            parse_mode="HTML"
         )
 
         await bot.send_video(
@@ -156,7 +166,8 @@ async def handle_message(message: types.Message):
         await bot.send_animation(
             ADMIN_GROUP_ID,
             message.animation.file_id,
-            caption=f"🎞 Гифка от {username}\n\n{caption}"
+            caption=f"🎞 Гифка от {username}\n\n{caption}",
+            parse_mode="HTML"
         )
 
         await bot.send_animation(
@@ -169,10 +180,15 @@ async def handle_message(message: types.Message):
 
     elif message.voice:
 
+        await bot.send_message(
+            ADMIN_GROUP_ID,
+            f"🎤 ГС от {username}",
+            parse_mode="HTML"
+        )
+
         await bot.send_voice(
             ADMIN_GROUP_ID,
-            message.voice.file_id,
-            caption=f"🎤 ГС от {username}"
+            message.voice.file_id
         )
 
         await bot.send_voice(
@@ -186,7 +202,8 @@ async def handle_message(message: types.Message):
 
         await bot.send_message(
             ADMIN_GROUP_ID,
-            f"📹 Кружочек от {username}"
+            f"📹 Кружочек от {username}",
+            parse_mode="HTML"
         )
 
         await bot.send_video_note(
