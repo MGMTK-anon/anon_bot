@@ -41,7 +41,7 @@ async def is_subscribed(user_id):
 @dp.message(CommandStart())
 async def start(message: types.Message):
     await message.answer(
-        "✉️ Отправь свою историю анонимно"
+        "✉️ Отправь своё сообщение"
     )
 
 
