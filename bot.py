@@ -85,18 +85,15 @@ async def handle_message(message: types.Message):
     caption = message.caption or ""
     text = message.text or caption
 
-    # ---------------- МИНИМУМ 5 СИМВОЛОВ ----------------
-    if not (
-        message.photo
-        or message.video
-        or message.voice
-        or message.video_note
-    ):
-        if len(text.strip()) < MIN_TEXT_LENGTH:
-            await message.answer(
-                "❌ Минимум 5 символов"
-            )
-            return
+# ---------------- МИНИМУМ 5 СИМВОЛОВ ----------------
+# Только для обычного текста
+
+if message.text:
+    if len(text.strip()) < MIN_TEXT_LENGTH:
+        await message.answer(
+            "❌ Минимум 5 символов"
+        )
+        return
 
     # ---------------- АДМИН ГРУППА ----------------
 
@@ -177,6 +174,20 @@ async def handle_message(message: types.Message):
             CHANNEL_ID,
             message.video_note.file_id
         )
+
+    # Гифка
+elif message.animation:
+    await bot.send_animation(
+        ADMIN_GROUP_ID,
+        message.animation.file_id,
+        caption=f"🎞 Гифка от {username}\n\n{caption}"
+    )
+
+    await bot.send_animation(
+        CHANNEL_ID,
+        message.animation.file_id,
+        caption=caption
+    )
 
     else:
         await message.answer(
