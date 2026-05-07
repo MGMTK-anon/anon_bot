@@ -1,4 +1,6 @@
 import asyncio
+import time
+
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.enums import ChatMemberStatus
@@ -8,11 +10,19 @@ TOKEN = "8684577150:AAEfo5PjQPX4hWu6soJr6zm2JQA8_kVkRHA"
 ADMIN_GROUP_ID = -1003783517039
 CHANNEL_ID = -1003838008372
 
-# username канала
-CHANNEL_USERNAME = "@mgmtk_anon"
+CHANNEL_USERNAME = "mgmtk_anon"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+
+# антиспам
+user_last_message = {}
+
+# минимум символов
+MIN_TEXT_LENGTH = 10
+
+# кулдаун антиспама (сек)
+SPAM_COOLDOWN = 10
 
 
 async def is_subscribed(user_id):
@@ -31,22 +41,39 @@ async def is_subscribed(user_id):
 @dp.message(CommandStart())
 async def start(message: types.Message):
     await message.answer(
-        "Отправь своё сообщение ✉️"
+        "✉️ Отправь свою историю анонимно"
     )
 
 
 @dp.message()
 async def handle_message(message: types.Message):
 
-    # проверка подписки
-    subscribed = await is_subscribed(message.from_user.id)
+    user_id = message.from_user.id
+
+    # ---------------- ПОДПИСКА ----------------
+    subscribed = await is_subscribed(user_id)
 
     if not subscribed:
         await message.answer(
-            f"❌ Чтобы отправлять сообщения, подпишись на канал {CHANNEL_USERNAME}"
+            f"❌ Подпишись на канал {CHANNEL_USERNAME}"
         )
         return
 
+    # ---------------- АНТИСПАМ ----------------
+    current_time = time.time()
+
+    if user_id in user_last_message:
+        last_time = user_last_message[user_id]
+
+        if current_time - last_time < SPAM_COOLDOWN:
+            await message.answer(
+                "⏳ Не спамь. Подожди немного."
+            )
+            return
+
+    user_last_message[user_id] = current_time
+
+    # ---------------- ДАННЫЕ ЮЗЕРА ----------------
     user = message.from_user
 
     username = (
@@ -55,19 +82,107 @@ async def handle_message(message: types.Message):
         else user.full_name
     )
 
-    text = message.text or "[не текст]"
+    caption = message.caption or ""
+    text = message.text or caption
 
-    # в группу админов
-    await bot.send_message(
-        ADMIN_GROUP_ID,
-        f"📩 Новое сообщение\n\nОт: {username}\n\n{text}"
+    # ---------------- МИНИМУМ 5 СИМВОЛОВ ----------------
+    if not (
+        message.photo
+        or message.video
+        or message.voice
+        or message.video_note
+    ):
+        if len(text.strip()) < MIN_TEXT_LENGTH:
+            await message.answer(
+                "❌ Минимум 5 символов"
+            )
+            return
+
+    # ---------------- АДМИН ГРУППА ----------------
+
+    admin_text = (
+        f"📩 Новое сообщение\n\n"
+        f"От: {username}\n\n"
+        f"{text}"
     )
 
-    # в канал анонимно
-    await bot.send_message(
-        CHANNEL_ID,
-        text
-    )
+    # Текст
+    if message.text:
+        await bot.send_message(
+            ADMIN_GROUP_ID,
+            admin_text
+        )
+
+        await bot.send_message(
+            CHANNEL_ID,
+            text
+        )
+
+    # Фото
+    elif message.photo:
+        photo = message.photo[-1].file_id
+
+        await bot.send_photo(
+            ADMIN_GROUP_ID,
+            photo,
+            caption=admin_text
+        )
+
+        await bot.send_photo(
+            CHANNEL_ID,
+            photo,
+            caption=caption
+        )
+
+    # Видео
+    elif message.video:
+        await bot.send_video(
+            ADMIN_GROUP_ID,
+            message.video.file_id,
+            caption=admin_text
+        )
+
+        await bot.send_video(
+            CHANNEL_ID,
+            message.video.file_id,
+            caption=caption
+        )
+
+    # Голосовое
+    elif message.voice:
+        await bot.send_voice(
+            ADMIN_GROUP_ID,
+            message.voice.file_id,
+            caption=f"🎤 ГС от {username}"
+        )
+
+        await bot.send_voice(
+            CHANNEL_ID,
+            message.voice.file_id
+        )
+
+    # Кружочек
+    elif message.video_note:
+        await bot.send_message(
+            ADMIN_GROUP_ID,
+            f"📹 Кружочек от {username}"
+        )
+
+        await bot.send_video_note(
+            ADMIN_GROUP_ID,
+            message.video_note.file_id
+        )
+
+        await bot.send_video_note(
+            CHANNEL_ID,
+            message.video_note.file_id
+        )
+
+    else:
+        await message.answer(
+            "❌ Этот тип файла не поддерживается"
+        )
+        return
 
     await message.answer(
         "✅ Сообщение успешно отправлено"
