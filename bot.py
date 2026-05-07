@@ -1,5 +1,6 @@
 import asyncio
 import time
+import re
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
@@ -23,6 +24,9 @@ MIN_TEXT_LENGTH = 10
 
 # кулдаун антиспама
 SPAM_COOLDOWN = 10
+
+# regex для ссылок
+LINK_REGEX = r"(https?:\/\/|www\.|t\.me\/|telegram\.me\/)"
 
 
 async def is_subscribed(user_id):
@@ -89,6 +93,15 @@ async def handle_message(message: types.Message):
 
     caption = message.caption or ""
     text = message.text or caption
+
+    # ---------------- ЗАПРЕТ ССЫЛОК ----------------
+
+    if re.search(LINK_REGEX, text.lower()):
+
+        await message.answer(
+            "❌ Ссылки запрещены"
+        )
+        return
 
     admin_text = (
         f"📩 Новое сообщение\n\n"
